@@ -1,3 +1,53 @@
+const crypto = require("crypto");
+
+const API_URL = "http://localhost:3000/device/real/query";
+const TOKEN = "interview_token_123";
+
+// 🔍 Debug (confirms file is running)
+console.log("🚀 Client started");
+
+/**
+ * Generate MD5 signature
+ */
+function generateSignature(url, token, timestamp) {
+  return crypto
+    .createHash("md5")
+    .update(url + token + timestamp)
+    .digest("hex");
+}
+
+/**
+ * Generate 500 serial numbers
+ */
+function generateSerialNumbers() {
+  const list = [];
+  for (let i = 0; i < 500; i++) {
+    list.push(`SN-${i.toString().padStart(3, "0")}`);
+  }
+  return list;
+}
+
+/**
+ * Split array into chunks of 10
+ */
+function chunkArray(array, size) {
+  const chunks = [];
+  for (let i = 0; i < array.length; i += size) {
+    chunks.push(array.slice(i, i + size));
+  }
+  return chunks;
+}
+
+/**
+ * Sleep helper
+ */
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * MAIN FUNCTION
+ */
 async function fetchAllData() {
   const serialNumbers = generateSerialNumbers();
   const batches = chunkArray(serialNumbers, 10);
@@ -56,9 +106,12 @@ async function fetchAllData() {
       console.log(`🚨 Batch ${i + 1} permanently failed`);
     }
 
-    await sleep(1000);
+    await sleep(1000); // 1 req/sec
   }
 
   console.log("🎉 All data fetched!");
   console.log("Total devices:", aggregatedResults.length);
 }
+
+// 🔥 THIS WAS MISSING (MOST IMPORTANT LINE)
+fetchAllData();
