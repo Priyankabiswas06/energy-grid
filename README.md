@@ -1,54 +1,32 @@
-# EnergyGrid Mock API
+# ⚡ EnergyGrid Data Aggregator
 
-This is the mock backend server for the EnergyGrid Data Aggregator coding assignment.
+A Node.js–based solution that simulates and consumes a legacy EnergyGrid API with **strict rate limits**, **batch constraints**, and **custom cryptographic authentication**.
 
-## Prerequisites
+This project includes:
+- A **Mock API Server** (to simulate EnergyGrid)
+- A **Client Aggregator** (to fetch data from 500 devices safely)
 
-- Node.js (v14 or higher)
-- npm (Node Package Manager)
+---
 
-## Setup and Run
+## 🚀 Features
 
-1.  **Navigate to the project directory:**
-    ```bash
-    cd mock-api
-    ```
+- ⏱️ Enforces **1 request per second** rate limit
+- 📦 Supports **batching (max 10 devices/request)**
+- 🔐 Implements **MD5-based request signature**
+- 🔁 Robust **retry handling** for network & rate-limit errors
+- 📊 Aggregates telemetry data for **500 solar inverters**
+- 🧹 Clean Git repository (no `node_modules`)
 
-2.  **Install dependencies:**
-    ```bash
-    npm install
-    ```
+---
 
-3.  **Start the server:**
-    ```bash
-    npm start
-    ```
-    Or directly:
-    ```bash
-    node server.js
-    ```
+## 🛠️ Tech Stack
 
-4.  **Verify:**
-    You should see the following output:
-    ```
-    ⚡ EnergyGrid Mock API running on port 3000
-       Constraints: 1 req/sec, Max 10 items/batch
-    ```
-    The server is now listening at `http://localhost:3000`.
+- **Node.js**
+- **Express.js**
+- **Crypto (MD5 hashing)**
+- Native `fetch` API (Node 18+)
 
-## API Details
+---
 
--   **Base URL:** `http://localhost:3000`
--   **Endpoint:** `POST /device/real/query`
--   **Auth Token:** `interview_token_123`
+## 📁 Project Structure
 
-### Security Headers Required
-Every request must include:
-- `timestamp`: Current time in milliseconds.
-- `signature`: `MD5( URL + Token + timestamp )`
-
-### Constraints
-- **Rate Limit:** 1 request per second.
-- **Batch Size:** Max 10 serial numbers per request.
-
-See `instructions.md` for full details.
