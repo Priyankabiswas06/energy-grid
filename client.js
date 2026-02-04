@@ -109,8 +109,17 @@ async function fetchAllData() {
     await sleep(1000); // 1 req/sec
   }
 
-  console.log("🎉 All data fetched!");
-  console.log("Total devices:", aggregatedResults.length);
+ console.log("🎉 All data fetched!");
+console.log("Total devices:", aggregatedResults.length);
+
+// ✅ Write report file
+fs.writeFileSync(
+  "report.json",
+  JSON.stringify(aggregatedResults, null, 2)
+);
+
+console.log("📄 Report saved as report.json");
+
 }
 
 // 🔥 THIS WAS MISSING (MOST IMPORTANT LINE)
