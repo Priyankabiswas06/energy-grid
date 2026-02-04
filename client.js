@@ -1,4 +1,5 @@
 const crypto = require("crypto");
+const fs = require("fs"); // ✅ MISSING IMPORT (FIXED)
 
 const API_URL = "http://localhost:3000/device/real/query";
 const TOKEN = "interview_token_123";
@@ -109,18 +110,38 @@ async function fetchAllData() {
     await sleep(1000); // 1 req/sec
   }
 
- console.log("🎉 All data fetched!");
-console.log("Total devices:", aggregatedResults.length);
+  console.log("🎉 All data fetched!");
+  console.log("Total devices:", aggregatedResults.length);
 
-// ✅ Write report file
-fs.writeFileSync(
-  "report.json",
-  JSON.stringify(aggregatedResults, null, 2)
-);
+  // 🔹 AGGREGATION LOGIC
+  let onlineCount = 0;
+  let offlineCount = 0;
+  let totalPower = 0;
 
-console.log("📄 Report saved as report.json");
+  aggregatedResults.forEach((device) => {
+    if (device.status === "Online") onlineCount++;
+    else offlineCount++;
 
+    const powerValue = parseFloat(device.power.replace(" kW", ""));
+    totalPower += powerValue;
+  });
+
+  const summary = {
+    total_devices: aggregatedResults.length,
+    online_devices: onlineCount,
+    offline_devices: offlineCount,
+    total_power_kw: totalPower.toFixed(2),
+    average_power_kw: (totalPower / aggregatedResults.length).toFixed(2),
+    generated_at: new Date().toISOString(),
+  };
+
+  // 🔹 SAVE FILES
+  fs.writeFileSync("report.json", JSON.stringify(aggregatedResults, null, 2));
+  fs.writeFileSync("summary.json", JSON.stringify(summary, null, 2));
+
+  console.log("📄 report.json saved (raw data)");
+  console.log("📊 summary.json saved (aggregated data)");
 }
 
-// 🔥 THIS WAS MISSING (MOST IMPORTANT LINE)
+// 🔥 REQUIRED CALL
 fetchAllData();
