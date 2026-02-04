@@ -1,10 +1,9 @@
 const crypto = require("crypto");
-const fs = require("fs"); // ✅ MISSING IMPORT (FIXED)
+const fs = require("fs");
 
 const API_URL = "http://localhost:3000/device/real/query";
 const TOKEN = "interview_token_123";
 
-// 🔍 Debug (confirms file is running)
 console.log("🚀 Client started");
 
 /**
@@ -107,41 +106,64 @@ async function fetchAllData() {
       console.log(`🚨 Batch ${i + 1} permanently failed`);
     }
 
-    await sleep(1000); // 1 req/sec
+    await sleep(1000); // strict 1 req/sec
   }
 
+  // ===== AGGREGATION =====
   console.log("🎉 All data fetched!");
   console.log("Total devices:", aggregatedResults.length);
 
-  // 🔹 AGGREGATION LOGIC
   let onlineCount = 0;
   let offlineCount = 0;
   let totalPower = 0;
 
-  aggregatedResults.forEach((device) => {
+  for (const device of aggregatedResults) {
     if (device.status === "Online") onlineCount++;
     else offlineCount++;
 
     const powerValue = parseFloat(device.power.replace(" kW", ""));
     totalPower += powerValue;
-  });
+  }
 
-  const summary = {
-    total_devices: aggregatedResults.length,
-    online_devices: onlineCount,
-    offline_devices: offlineCount,
-    total_power_kw: totalPower.toFixed(2),
-    average_power_kw: (totalPower / aggregatedResults.length).toFixed(2),
-    generated_at: new Date().toISOString(),
-  };
+  const averagePower =
+    aggregatedResults.length > 0
+      ? totalPower / aggregatedResults.length
+      : 0;
 
-  // 🔹 SAVE FILES
-  fs.writeFileSync("report.json", JSON.stringify(aggregatedResults, null, 2));
-  fs.writeFileSync("summary.json", JSON.stringify(summary, null, 2));
+  // ===== PRINT SUMMARY =====
+  console.log("🟢 Online devices:", onlineCount);
+  console.log("🔴 Offline devices:", offlineCount);
+  console.log("⚡ Total power (kW):", totalPower.toFixed(2));
+  console.log("📊 Average power (kW):", averagePower.toFixed(2));
 
-  console.log("📄 report.json saved (raw data)");
-  console.log("📊 summary.json saved (aggregated data)");
+  // ===== SAVE FILES =====
+  fs.writeFileSync(
+    "report.json",
+    JSON.stringify(aggregatedResults, null, 2)
+  );
+
+  fs.writeFileSync(
+    "summary.json",
+    JSON.stringify(
+      {
+        total_devices: aggregatedResults.length,
+        online_devices: onlineCount,
+        offline_devices: offlineCount,
+        total_power_kw: totalPower.toFixed(2),
+        average_power_kw: averagePower.toFixed(2),
+        generated_at: new Date().toISOString(),
+      },
+      null,
+      2
+    )
+  );
+
+  console.log("📄 report.json saved");
+  console.log("📊 summary.json saved");
+  console.log("✅ Client finished successfully");
 }
 
-// 🔥 REQUIRED CALL
-fetchAllData();
+// ✅ SINGLE SAFE CALL
+fetchAllData().catch((err) => {
+  console.error("❌ Fatal error:", err);
+});
